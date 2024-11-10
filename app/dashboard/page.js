@@ -6,17 +6,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Moon, Sun, Wind, MapPin, Search, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useCombobox } from "downshift"
+import debounce from "lodash.debounce"
 
 export default function Component() {
   const [query, setQuery] = useState("")
   const [weatherData, setWeatherData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
   const { toast } = useToast()
 
-  const fetchWeatherData = async (lat, lon) => {
+  const fetchWeatherData = async (lat, lon, locationName) => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/weather?${lat && lon ? `query=${lat},${lon}` : `query=${encodeURIComponent(query)}`}`)
+      const response = await fetch(`/api/v1/weather?q=${lat && lon ? `${lat},${lon}` : `${encodeURIComponent(locationName || query)}`}`)
       if (!response.ok) {
         throw new Error("Failed to fetch weather data")
       }
@@ -33,6 +36,24 @@ export default function Component() {
       setLoading(false)
     }
   }
+
+  const fetchSuggestions = debounce(async (inputValue) => {
+    if (inputValue.length < 3) {
+      setSuggestions([])
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/v1/search?q=${encodeURIComponent(inputValue)}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch suggestions")
+      }
+      const data = await response.json()
+      setSuggestions(data)
+    } catch (error) {
+      console.error("Error fetching suggestions:", error)
+    }
+  }, 300)
 
   useEffect(() => {
     const getLocationAndFetchWeather = () => {
@@ -63,58 +84,65 @@ export default function Component() {
     getLocationAndFetchWeather()
   }, [])
 
-  const getAirQualityText = (index) => {
-    switch (index) {
-      case 1:
-        return "Good"
-      case 2:
-        return "Moderate"
-      case 3:
-        return "Unhealthy for Sensitive Groups"
-      case 4:
-        return "Unhealthy"
-      case 5:
-        return "Very Unhealthy"
-      case 6:
-        return "Hazardous"
-      default:
-        return "Unknown"
-    }
-  }
+  const {
+    isOpen,
+    getMenuProps,
+    getInputProps,
+    getItemProps,
+    highlightedIndex,
+    selectedItem,
+  } = useCombobox({
+    items: suggestions,
+    onInputValueChange: ({ inputValue }) => {
+      setQuery(inputValue)
+      fetchSuggestions(inputValue)
+    },
+    itemToString: (item) => (item ? `${item.name}, ${item.region}, ${item.country}` : ""),
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (selectedItem) {
+        fetchWeatherData(selectedItem.lat, selectedItem.lon, selectedItem.name)
+      }
+    },
+  })
 
-  const getAirQualityColor = (index) => {
-    switch (index) {
-      case 1:
-        return "text-green-500"
-      case 2:
-        return "text-yellow-500"
-      case 3:
-        return "text-orange-500"
-      case 4:
-        return "text-red-500"
-      case 5:
-        return "text-purple-500"
-      case 6:
-        return "text-rose-700"
-      default:
-        return "text-gray-500"
-    }
-  }
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
-      <div className="flex gap-2">
-        <Input
-          className="flex-grow h-12 text-lg bg-sky-50 border-sky-200 focus:border-sky-400 focus:ring-sky-400"
-          placeholder="Search for a city..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && fetchWeatherData()}
-        />
-        <Button className="h-12 bg-sky-500 hover:bg-sky-600" onClick={() => fetchWeatherData()} disabled={loading}>
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
-          <span className="sr-only">{loading ? "Loading" : "Search"}</span>
-        </Button>
+      <div className="relative">
+        <div className="flex gap-2">
+          <Input
+            {...getInputProps()}
+            className="flex-grow h-12 text-lg bg-sky-50 border-sky-200 focus:border-sky-400 focus:ring-sky-400"
+            placeholder="Search for a city..."
+          />
+          <Button
+            className="h-12 bg-sky-500 hover:bg-sky-600"
+            onClick={() => fetchWeatherData()}
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+            <span className="sr-only">{loading ? "Loading" : "Search"}</span>
+          </Button>
+        </div>
+        <ul
+          {...getMenuProps()}
+          className={`absolute z-10 w-full bg-white border border-gray-300 mt-1 max-h-60 overflow-auto rounded-md shadow-lg ${
+            isOpen && suggestions.length > 0 ? "" : "hidden"
+          }`}
+        >
+          {isOpen &&
+            suggestions.map((item, index) => (
+              <li
+                key={item.id}
+                {...getItemProps({ item, index })}
+                className={`px-4 py-2 cursor-pointer ${
+                  highlightedIndex === index ? "bg-sky-100" : ""
+                } ${selectedItem === item ? "font-bold" : ""}`}
+              >
+                {`${item.name}, ${item.region}, ${item.country}`}
+              </li>
+            ))}
+        </ul>
       </div>
 
       {weatherData && (
@@ -216,11 +244,34 @@ export default function Component() {
                     </div>
                     <span className="text-blue-900">{weatherData.current.gust_kph} km/h</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-800">Air Quality</span>
-                    <span className={`font-medium ${getAirQualityColor(weatherData.current.air_quality["us-epa-index"])}`}>
-                      {getAirQualityText(weatherData.current.air_quality["us-epa-index"])}
-                    </span>
+                  <div className="space-y-2">
+                    <h4 className="text-blue-800 font-semibold">Pollutants</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">CO:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.co.toFixed(2)} μg/m³</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">NO₂:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.no2.toFixed(2)} μg/m³</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">O₃:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.o3.toFixed(2)} μg/m³</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">SO₂:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.so2.toFixed(2)} μg/m³</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">PM2.5:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.pm2_5.toFixed(2)} μg/m³</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-blue-700">PM10:</span>
+                        <span className="text-blue-900">{weatherData.current.air_quality.pm10.toFixed(2)} μg/m³</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
