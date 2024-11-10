@@ -1,10 +1,10 @@
-import WeatherAPI from '../../../lib/weatherapi';
+import WeatherAPI from '../../../../lib/weatherapi';
 import { NextResponse } from 'next/server';
 
 // all the endpoints are available in the WeatherAPI class
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get('query');
+    const query = searchParams.get('q');
     const apiKey = process.env.WEATHER_API_KEY;
     const weatherAPI = new WeatherAPI(apiKey);
 
