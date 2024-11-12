@@ -10,7 +10,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
-import { auth, googleProvider } from "./config/firebase"
+import { auth, googleProvider } from "../config/firebase"
+
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth"
 
 
