@@ -225,7 +225,7 @@ export default function Component() {
                   />
                   <div>
                     <div className="text-6xl font-bold text-blue-900">{Math.round(weatherData.current.temp_c)}°</div>
-                    <div className="text-xl text-blue-800">RealFeel® {Math.round(weatherData.current.temp_c)}°</div>
+                    <div className="text-xl text-blue-800">Feels Like {Math.round(weatherData.current.feelslike_c)}°</div>
                     <div className="text-xl text-blue-700">{weatherData.current.condition.text}</div>
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export default function Component() {
                       <Wind className="h-5 w-5 text-blue-500" />
                       <span className="text-blue-800">Wind</span>
                     </div>
-                    <span className="text-blue-900">E {weatherData.current.wind_kph} km/h</span>
+                    <span className="text-blue-900">{`${weatherData.current.wind_dir} ${weatherData.current.wind_kph} km/h`}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -247,27 +247,27 @@ export default function Component() {
                   <div className="space-y-2">
                     <h4 className="text-blue-800 font-semibold">Pollutants</h4>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">CO:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.co.toFixed(2)} μg/m³</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">NO₂:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.no2.toFixed(2)} μg/m³</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">O₃:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.o3.toFixed(2)} μg/m³</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">SO₂:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.so2.toFixed(2)} μg/m³</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">PM2.5:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.pm2_5.toFixed(2)} μg/m³</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-around">
                         <span className="text-blue-700">PM10:</span>
                         <span className="text-blue-900">{weatherData.current.air_quality.pm10.toFixed(2)} μg/m³</span>
                       </div>
