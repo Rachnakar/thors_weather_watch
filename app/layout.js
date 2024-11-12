@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link'
 import { Sun, Cloud, Droplets, Code, Menu } from 'lucide-react'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}>
+        <Toaster />
         <div className="flex flex-col min-h-screen">
           <header className="bg-white shadow-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
