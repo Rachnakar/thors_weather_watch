@@ -28,7 +28,7 @@ export default function RootLayout({ children }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center py-4">
                 <div className="flex items-center">
-                  <Sun className="h-8 w-8 text-yellow-500 mr-2" />
+                  <Sun className="h-8 w-8 text-yellow-500 mr-2 animate-spin" />
                   <span className="text-2xl font-bold text-gray-900">Thor's Weather Watch</span>
                 </div>
                 <nav className="hidden md:flex items-center space-x-8">
