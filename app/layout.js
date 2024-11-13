@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { Sun, Cloud, Droplets, Code, Menu, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react';
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -58,10 +59,10 @@ function Layout({ children }) {
                   <Droplets className="h-5 w-5 mr-1" />
                   Forecast
                 </Link>
-                <Link 
-                  href="https://github.com/rachnakar/thors_weather_watch" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <Link
+                  href="https://github.com/rachnakar/thors_weather_watch"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-gray-700 hover:text-blue-600 flex items-center"
                 >
                   <Code className="h-5 w-5 mr-1" />
@@ -108,9 +109,9 @@ function Layout({ children }) {
                       <Link href="/forecast">Forecast</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link 
-                        href="https://github.com/rachnakar/thors_weather_watch" 
-                        target="_blank" 
+                      <Link
+                        href="https://github.com/rachnakar/thors_weather_watch"
+                        target="_blank"
                         rel="noopener noreferrer"
                       >
                         Source Code
@@ -153,9 +154,9 @@ function Layout({ children }) {
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-500">© 2024 Thor's Weather Watch. All rights reserved.</p>
               <div className="flex space-x-6">
-                <a 
-                  href="https://github.com/MahtoSujeet" 
-                  target="_blank" 
+                <a
+                  href="https://github.com/MahtoSujeet"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-gray-500"
                 >
@@ -177,7 +178,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-          <Layout>{children}</Layout>
+        <Toaster />
+        <Layout>{children}</Layout>
       </body>
     </html>
   )
